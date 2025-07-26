@@ -1,17 +1,7 @@
 // src/components/forms/LicenseForm.tsx
 import React, { useState } from 'react';
 import { FaPlus, FaPaperPlane } from 'react-icons/fa';
-
-interface LicenseFormData {
-  licenseId: string;
-  type: string;
-  vendor: string;
-  validityStart: string;
-  validityEnd: string;
-  purchaseDate: string;
-  maxUsers: string;
-  invoiceNumber: string;
-}
+import type { LicenseFormData } from '../../types/LicenseFormData';
 
 const LicenseForm = () => {
   const [formData, setFormData] = useState<LicenseFormData>({
@@ -21,13 +11,16 @@ const LicenseForm = () => {
     validityStart: '',
     validityEnd: '',
     purchaseDate: '',
-    maxUsers: '',
+    maxUsers: 0,
     invoiceNumber: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === 'maxUsers' ? Number(value) : value,
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,24 +32,25 @@ const LicenseForm = () => {
     <div className="flex justify-center items-center min-h-[90vh] px-4 transition-colors duration-300">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-xl p-8 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm space-y-6 transition-all duration-300"
+        className="w-full max-w-xl bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-lg p-8 space-y-6"
       >
         <div className="flex items-center gap-3 justify-center text-2xl font-bold text-gray-800 dark:text-gray-100">
+          <FaPlus />
           <h2>Add License to Inventory</h2>
         </div>
 
         {(
           [
-            { label: 'License ID', name: 'licenseId' },
-            { label: 'Type', name: 'type' },
-            { label: 'Vendor', name: 'vendor' },
+            { label: 'License ID', name: 'licenseId', type: 'text' },
+            { label: 'Type', name: 'type', type: 'text' },
+            { label: 'Vendor', name: 'vendor', type: 'text' },
             { label: 'Validity Start', name: 'validityStart', type: 'date' },
             { label: 'Validity End', name: 'validityEnd', type: 'date' },
             { label: 'Purchase Date', name: 'purchaseDate', type: 'date' },
             { label: 'Max Users', name: 'maxUsers', type: 'number' },
-            { label: 'Invoice Number', name: 'invoiceNumber' },
+            { label: 'Invoice Number', name: 'invoiceNumber', type: 'text' },
           ] as const
-        ).map(({ label, name, type = 'text' }) => (
+        ).map(({ label, name, type }) => (
           <div key={name}>
             <label
               htmlFor={name}
