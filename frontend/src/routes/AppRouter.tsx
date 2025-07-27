@@ -5,6 +5,9 @@ import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import UserDashboard from '../pages/user/UserDashboard';
+import ReportOptions from '../components/features/DownloadReport';
+import SectionWrapper from '../components/sections/SectionWrapper';
+// Update the import path and extension if the file exists as DownloadReport.tsx
 
 const AppRouter = () => {
   return (
@@ -18,7 +21,11 @@ const AppRouter = () => {
       <Route path="/user/login" element={<Login />} />
 
       {/* Dashboards */}
-      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      {/* Admin Dashboard Layout with Nested Routes */}
+      <Route path="/admin/dashboard/*" element={<AdminDashboard />}>
+        <Route path="reports" element={<ReportOptions />} />
+        {/* Add more nested routes here if needed */}
+      </Route>
       <Route path="/user/dashboard" element={<UserDashboard />} />
     </Routes>
   );

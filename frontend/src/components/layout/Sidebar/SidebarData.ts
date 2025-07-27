@@ -6,5 +6,5 @@ export const sidebarItems = [
   { label: 'Expiry & Renewal', icon: FaClock },
   { label: 'License Management', icon: FaCogs },
   { label: 'Procurement', icon: FaShoppingCart },
-  { label: 'Reports & Audit', icon: FaChartBar },
+  { label: 'Reports & Audit', icon: FaChartBar},
 ];
