@@ -1,5 +1,6 @@
 export interface LicenseFormData {
   licenseId: string;
+  SoftwareName: string;
   type: string;
   vendor: string;
   validityStart: string;

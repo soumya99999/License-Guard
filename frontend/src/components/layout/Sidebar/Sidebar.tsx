@@ -12,7 +12,6 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ selectedSidebarItem, onSelectSidebarItem }) => {
   const [isExpanded, setIsExpanded] = useState(true);
-  
 
   const toggleSidebar = () => {
     setIsExpanded((prev) => !prev);

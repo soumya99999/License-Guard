@@ -5,9 +5,8 @@ import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import UserDashboard from '../pages/user/UserDashboard';
-import ReportOptions from '../components/features/DownloadReport';
-import SectionWrapper from '../components/sections/SectionWrapper';
-// Update the import path and extension if the file exists as DownloadReport.tsx
+import DeptHeadDashboard from '../pages/deptHead/DeptHeadDashboard';
+import PrivateRoute from '../components/common/PrivateRoute';
 
 const AppRouter = () => {
   return (
@@ -21,12 +20,30 @@ const AppRouter = () => {
       <Route path="/user/login" element={<Login />} />
 
       {/* Dashboards */}
-      {/* Admin Dashboard Layout with Nested Routes */}
-      <Route path="/admin/dashboard/*" element={<AdminDashboard />}>
-        <Route path="reports" element={<ReportOptions />} />
-        {/* Add more nested routes here if needed */}
-      </Route>
-      <Route path="/user/dashboard" element={<UserDashboard />} />
+      <Route
+        path="/admin/dashboard"
+        element={
+          <PrivateRoute allowedRoles={['ADMIN']}>
+            <AdminDashboard />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/user/dashboard"
+        element={
+          <PrivateRoute allowedRoles={['USER']}>
+            <UserDashboard />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/dept-head/dashboard"
+        element={
+          <PrivateRoute allowedRoles={['DEPT_HEAD']}>
+            <DeptHeadDashboard />
+          </PrivateRoute>
+        }
+      />
     </Routes>
   );
 };

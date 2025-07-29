@@ -10,6 +10,8 @@ const UserDashboard = () => {
     return localStorage.getItem('theme') === 'dark';
   });
 
+  const [showDepartments, setShowDepartments] = useState(false); // 👈 New State
+
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDark) {
@@ -25,7 +27,7 @@ const UserDashboard = () => {
 
   return (
     <div className="flex h-screen bg-cyan-50 dark:bg-gray-900">
-      <Sidebar isExpanded={isExpanded} />
+      <Sidebar isExpanded={isExpanded} setShowDepartments={setShowDepartments} /> {/* 👈 Pass setShowDepartments */}
       <div className="flex-1 flex flex-col">
         <Header
           toggleSidebar={() => setIsExpanded(!isExpanded)}
@@ -33,7 +35,7 @@ const UserDashboard = () => {
           toggleDarkMode={toggleDarkMode}
         />
         <main className="flex-1 overflow-y-auto px-4 py-6">
-          <UserWelcome />
+          <UserWelcome showDepartments={showDepartments} />
         </main>
       </div>
     </div>

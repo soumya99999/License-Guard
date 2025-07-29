@@ -1,29 +1,19 @@
+// src/components/sections/SectionWrapper.tsx
+
 import React from 'react';
 import Hero from './hero/Hero';
-import Footer from '../layout/Footer/Footer';
-import ReportOptions from '../features/DownloadReport';
 import StatsSection from './stats/StatsSection';
+import Reports from './reports/Reports';
+import Footer from '../layout/Footer/Footer';
 
-interface SectionWrapperProps {
-  showHero?: boolean;
-  showStats?: boolean;
-  showReports?: boolean;
-  showFooter?: boolean;
-}
-
-const SectionWrapper: React.FC<SectionWrapperProps> = ({
-  showHero = true,
-  showStats = true,
-  showReports = true,
-  showFooter = true,
-}) => {
+const SectionWrapper: React.FC = () => {
   return (
     <div className="flex-1 overflow-y-auto scrollbar-hide px-4 py-6 space-y-12 dark:bg-gray-900 bg-cyan-50">
-      {showHero && <Hero />}
-      {showStats && <StatsSection />}
-      {showReports &&
-       <ReportOptions />}
-      {showFooter && <Footer />}
+      <Hero />
+      <StatsSection />
+      <Reports />
+      <Footer />
+      {/* Add more sections here later */}
     </div>
   );
 };

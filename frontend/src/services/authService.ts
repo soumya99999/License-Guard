@@ -1,14 +1,7 @@
 import axios from 'axios';
+import type { LoginResponse } from '../types/LoginResponse';
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
-
-export interface LoginResponse {
-  userId: number;
-  username: string;
-  role: string;
-  isApproved: boolean;
-  departmentId: number | null;
-}
 
 export interface RegisterRequest {
   username: string;
@@ -24,6 +17,7 @@ const login = async (username: string, password: string): Promise<LoginResponse>
     username,
     password,
   });
+  console.log(response.data);
   return response.data;
 };
 
