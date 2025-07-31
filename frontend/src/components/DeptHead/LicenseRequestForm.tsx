@@ -1,6 +1,6 @@
 // src/components/DeptHead/LicenseRequestForm.tsx
 import { useState } from 'react';
-import { sendDeptLicenseRequest } from '../../services/deptLicenseService';
+import { createDeptLicenseRequest } from '../../services/deptLicenseService';
 import { useUserStore } from '../../store/userStore';
 
 interface Props {
@@ -13,20 +13,19 @@ const LicenseRequestForm = ({ onClose }: Props) => {
   const { user } = useUserStore();
   const [softwareName, setSoftwareName] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [email, setEmail] = useState(user?.email || '');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.departmentId) return alert('Department not found');
+    if (!user?.departmentId || !user?.id) return alert('Department or User not found');
 
     try {
       setLoading(true);
-      await sendDeptLicenseRequest({
+      await createDeptLicenseRequest({
         softwareName,
         requestedQuantity: quantity,
-        email,
         departmentId: user.departmentId,
+        requestedByUserId: user.id,
       });
       alert('License request sent successfully');
       onClose();
@@ -71,19 +70,6 @@ const LicenseRequestForm = ({ onClose }: Props) => {
             max={10}
             value={quantity}
             onChange={(e) => setQuantity(Number(e.target.value))}
-            className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
             required
           />

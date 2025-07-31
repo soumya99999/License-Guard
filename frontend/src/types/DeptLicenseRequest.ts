@@ -1,10 +1,10 @@
-export interface DeptLicenseRequestDTO {
+export interface DeptLicenseRequest {
   id: number;
   departmentId: number;
   softwareName: string;
   requestedQuantity: number;
   status: string;
-  reason?: string;
-  email: string;
-  requestedAt: string;
+  requestedAt: string; // ISO date string
+  requestedByUserId: number;
+  requestedByEmail: string;
 }

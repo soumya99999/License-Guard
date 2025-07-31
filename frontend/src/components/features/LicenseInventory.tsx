@@ -8,17 +8,10 @@ const LicenseInventory: React.FC = () => {
   const [procurements, setProcurements] = useState<ProcurementRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Map procurementId to boolean indicating if license exists
   const [licenseCreatedMap, setLicenseCreatedMap] = useState<Record<number, boolean>>({});
-
-  // View mode: 'list' or 'form'
   const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
 
-  // Index of procurement record currently editing in form
-  const [currentFormIndex, setCurrentFormIndex] = useState<number | null>(null);
 
-  // Form state for license creation
   const [formData, setFormData] = useState<LicenseInventoryDTO>({
     softwareName: '',
     licenseKey: '',
@@ -29,12 +22,10 @@ const LicenseInventory: React.FC = () => {
     procurementRecordId: 0,
   });
 
-  // Form errors and submission status
   const [formErrors, setFormErrors] = useState<string | null>(null);
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
-  // Fetch procurement records and license status map
   const loadProcurementsAndLicenses = async () => {
     setLoading(true);
     setError(null);
@@ -42,7 +33,6 @@ const LicenseInventory: React.FC = () => {
       const procs = await fetchAllProcurements();
       setProcurements(procs);
 
-      // For each procurement, check if license exists
       const licenseStatusMap: Record<number, boolean> = {};
       await Promise.all(
         procs.map(async (proc) => {
@@ -66,19 +56,17 @@ const LicenseInventory: React.FC = () => {
     loadProcurementsAndLicenses();
   }, []);
 
-  // Handle input change in form
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]:
-        name === 'quantity' || name === 'departmentId' || name === 'procurementRecordId'
+        name === 'totalQuantity' || name === 'departmentId' || name === 'procurementRecordId'
           ? Number(value)
           : value,
     }));
   };
 
-  // Handle create license button click - open form with prefilled data
   const handleCreateClick = (index: number) => {
     const proc = procurements[index];
     setFormData({
@@ -93,17 +81,14 @@ const LicenseInventory: React.FC = () => {
     setFormErrors(null);
     setFormSuccess(null);
     setFormSubmitting(false);
-    setCurrentFormIndex(index);
     setViewMode('form');
   };
 
-  // Handle form submit to create license
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors(null);
     setFormSuccess(null);
 
-    // Basic validation
     if (
       !formData.softwareName ||
       !formData.licenseKey ||
@@ -116,17 +101,11 @@ const LicenseInventory: React.FC = () => {
     }
 
     setFormSubmitting(true);
-
     try {
       await createLicense(formData);
       setFormSuccess('License created successfully.');
-
-      // Refresh procurement and license status
       await loadProcurementsAndLicenses();
-
-      // Return to list view
       setViewMode('list');
-      setCurrentFormIndex(null);
       setFormSubmitting(false);
     } catch {
       setFormErrors('Failed to create license.');
@@ -134,27 +113,19 @@ const LicenseInventory: React.FC = () => {
     }
   };
 
-  // Handle cancel button in form
   const handleCancel = () => {
     setFormErrors(null);
     setFormSuccess(null);
     setFormSubmitting(false);
     setViewMode('list');
-    setCurrentFormIndex(null);
   };
 
-  if (loading) {
-    return <p>Loading procurement records...</p>;
-  }
-
-  if (error) {
-    return <p className="text-red-600">{error}</p>;
-  }
+  if (loading) return <p>Loading procurement records...</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
 
   if (viewMode === 'list') {
-    if (procurements.length === 0) {
-      return <p>No procurement records found.</p>;
-    }
+    if (procurements.length === 0) return <p>No procurement records found.</p>;
+
     return (
       <div className="p-6">
         <h1 className="text-2xl dark:text-white text-black font-bold mb-4">Create Licenses for Procurement Records</h1>
@@ -163,7 +134,6 @@ const LicenseInventory: React.FC = () => {
             <h2 className="text-lg font-semibold mb-2">Order Number: {proc.orderNumber}</h2>
             <p>Software Name: {proc.softwareName}</p>
             <p>Quantity: {proc.quantity}</p>
-            <p>Department ID: {proc.departmentId}</p>
             {licenseCreatedMap[proc.poHeaderId] ? (
               <p className="text-green-600 font-semibold mt-2">License Created</p>
             ) : (
@@ -178,13 +148,6 @@ const LicenseInventory: React.FC = () => {
         ))}
       </div>
     );
-  }
-
-  // viewMode === 'form'
-  if (currentFormIndex === null) {
-    // Defensive fallback to list view
-    setViewMode('list');
-    return null;
   }
 
   return (
@@ -222,7 +185,7 @@ const LicenseInventory: React.FC = () => {
               type="date"
               id="purchaseDate"
               name="purchaseDate"
-              value={formData.purchaseDate ? formData.purchaseDate.split('T')[0] : ''}
+              value={formData.purchaseDate?.split('T')[0] || ''}
               onChange={handleInputChange}
               className="w-full border border-gray-300 rounded px-3 py-2"
               required
@@ -234,18 +197,18 @@ const LicenseInventory: React.FC = () => {
               type="date"
               id="expiryDate"
               name="expiryDate"
-              value={formData.expiryDate ? formData.expiryDate.split('T')[0] : ''}
+              value={formData.expiryDate?.split('T')[0] || ''}
               onChange={handleInputChange}
               className="w-full border border-gray-300 rounded px-3 py-2"
               required
             />
           </div>
           <div>
-            <label htmlFor="quantity" className="block font-medium">Total Quantity</label>
+            <label htmlFor="totalQuantity" className="block font-medium">Total Quantity</label>
             <input
               type="number"
-              id="quantity"
-              name="quantity"
+              id="totalQuantity"
+              name="totalQuantity"
               value={formData.totalQuantity}
               onChange={handleInputChange}
               className="w-full border border-gray-300 rounded px-3 py-2"
@@ -253,30 +216,11 @@ const LicenseInventory: React.FC = () => {
               required
             />
           </div>
-          <div>
-            <label htmlFor="departmentId" className="block font-medium">Department ID</label>
-            <input
-              type="number"
-              id="departmentId"
-              name="departmentId"
-              value={formData.departmentId}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
-              min={1}
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="procurementRecordId" className="block font-medium">Procurement Record ID</label>
-            <input
-              type="number"
-              id="procurementRecordId"
-              name="procurementRecordId"
-              value={formData.procurementRecordId}
-              readOnly
-              className="w-full border border-gray-300 rounded px-3 py-2"
-            />
-          </div>
+
+          {/* Hidden Fields */}
+          <input type="hidden" name="departmentId" value={formData.departmentId} />
+          <input type="hidden" name="procurementRecordId" value={formData.procurementRecordId} />
+
           {formErrors && <p className="text-red-600">{formErrors}</p>}
           {formSuccess && <p className="text-green-600">{formSuccess}</p>}
           <div className="flex justify-end space-x-2">

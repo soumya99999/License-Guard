@@ -4,7 +4,6 @@ import Home from '../pages/Home';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import AdminDashboard from '../pages/admin/AdminDashboard';
-import UserDashboard from '../pages/user/UserDashboard';
 import DeptHeadDashboard from '../pages/deptHead/DeptHeadDashboard';
 import PrivateRoute from '../components/common/PrivateRoute';
 
@@ -25,14 +24,6 @@ const AppRouter = () => {
         element={
           <PrivateRoute allowedRoles={['ADMIN']}>
             <AdminDashboard />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/user/dashboard"
-        element={
-          <PrivateRoute allowedRoles={['USER']}>
-            <UserDashboard />
           </PrivateRoute>
         }
       />

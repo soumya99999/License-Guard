@@ -13,9 +13,6 @@ const Home = () => {
         <Link to="/dept-head/login" className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
           Department Head
         </Link>
-        <Link to="/user/register" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-          User
-        </Link>
       </div>
     </div>
   );

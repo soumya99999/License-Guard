@@ -1,207 +1,221 @@
 import React, { useEffect, useState } from 'react';
-import { fetchDeptLicenseRequests } from '../../services/deptLicenseService';
-import { assignLicense} from '../../services/assignService';
+import { getAllDeptLicenseRequests } from '../../services/deptLicenseService';
+import { assignLicense } from '../../services/assignService';
+import { getAllLicenses } from '../../services/LicenseService';
+
+import type { DeptLicenseRequest } from '../../types/DeptLicenseRequest';
 import type { AssignLicenseData } from '../../types/AssignLicenseData';
-import type { DeptLicenseRequestDTO } from '../../types/DeptLicenseRequest';
+import type { LicenseInventoryDTO } from '../../types/LicenseInventoryDTO';
 
 const LicenseAssignment: React.FC = () => {
-  const [requests, setRequests] = useState<DeptLicenseRequestDTO[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [requests, setRequests] = useState<DeptLicenseRequest[]>([]);
+  const [inventories, setInventories] = useState<LicenseInventoryDTO[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<DeptLicenseRequest | null>(null);
+  const [formData, setFormData] = useState<AssignLicenseData | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [assigningRequest, setAssigningRequest] = useState<DeptLicenseRequestDTO | null>(null);
-  const [formData, setFormData] = useState<AssignLicenseData>({
-    licenseInventoryId: 0,
-    assignedToUserId: 0,
-    assignedByUserId: 0,
-    assignedQuantity: 0,
-    expiresAt: '',
-  });
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    loadRequests();
+    fetchRequests();
+    fetchInventories();
   }, []);
 
-  const loadRequests = async () => {
-    setLoading(true);
-    setError(null);
+  const fetchRequests = async () => {
     try {
-      const data = await fetchDeptLicenseRequests();
+      const data = await getAllDeptLicenseRequests();
       setRequests(data);
-    } catch (err) {
-      console.error('Error fetching license requests:', err);
-      setError('Failed to load license requests.');
-    } finally {
-      setLoading(false);
+    } catch {
+      setError('Failed to fetch department license requests.');
     }
   };
 
-  const openAssignForm = (request: DeptLicenseRequestDTO) => {
-    setAssigningRequest(request);
+  const fetchInventories = async () => {
+    try {
+      const data = await getAllLicenses();
+      setInventories(data);
+    } catch {
+      setError('Failed to fetch license inventories.');
+    }
+  };
+
+  const handleAssignClick = (request: DeptLicenseRequest) => {
+    const matchingInventories = inventories.filter(
+      (inv) => inv.softwareName === request.softwareName
+    );
+
+    const selectedInventoryId = matchingInventories.length === 1 ? matchingInventories[0].id : 0;
+
+    setSelectedRequest(request);
     setFormData({
-      licenseInventoryId: 0,
-      assignedToUserId: request.requestedByUserId || 0,
-      assignedByUserId: 0,
+      id: 0,
+      licenseInventoryId: selectedInventoryId,
+      departmentId: request.departmentId,
       assignedQuantity: request.requestedQuantity,
       expiresAt: '',
+      softwareName: request.softwareName,
+      deptLicenseRequestId: request.id,
     });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    if (!formData) return;
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'assignedQuantity' || name === 'licenseInventoryId' || name === 'assignedToUserId' || name === 'assignedByUserId'
-        ? Number(value)
-        : value,
-    }));
+
+    setFormData({
+      ...formData,
+      [name]:
+        name === 'assignedQuantity' || name === 'licenseInventoryId'
+          ? Number(value)
+          : value,
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!assigningRequest) return;
+    if (!formData || formData.licenseInventoryId === 0) {
+      setError('Please select a valid license inventory.');
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    setSuccessMessage(null);
 
     try {
       await assignLicense(formData);
-      // Update the status of the particular request from PENDING to APPROVED
-      setRequests(prev =>
-        prev.map(req =>
-          req.id === assigningRequest.id ? { ...req, status: 'APPROVED' } : req
-        )
-      );
-      setAssigningRequest(null);
-    } catch (err) {
-      console.error('Error assigning license:', err);
+      setSuccessMessage('License assigned successfully.');
+      setSelectedRequest(null);
+      setFormData(null);
+      fetchRequests(); // Refresh the list
+    } catch {
       setError('Failed to assign license.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleCancel = () => {
-    setAssigningRequest(null);
-    setError(null);
-  };
+  return (
+    <div className="p-6">
+      <h2 className="text-xl font-semibold mb-4">Department License Requests</h2>
 
-  if (loading) {
-    return <div className="p-6">Loading license requests...</div>;
-  }
+      {error && <p className="text-red-500 mb-2">{error}</p>}
+      {successMessage && <p className="text-green-600 mb-2">{successMessage}</p>}
 
-  if (error) {
-    return <div className="p-6 text-red-600">{error}</div>;
-  }
+      {/* Requests Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {requests.map((request) => (
+          <div
+            key={request.id}
+            className="border rounded-lg p-4 shadow-md bg-white flex flex-col justify-between"
+          >
+            <div>
+              <p><strong>Software:</strong> {request.softwareName}</p>
+              <p><strong>Requested Quantity:</strong> {request.requestedQuantity}</p>
+              <p><strong>Status:</strong> {request.status}</p>
+            </div>
 
-  if (assigningRequest) {
-    return (
-      <div className="p-6 max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Assign License</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="licenseInventoryId" className="block font-medium">License Inventory ID</label>
+            {request.status === 'APPROVED' ? (
+              <button
+                className="mt-3 bg-green-500 text-white px-3 py-1 rounded cursor-not-allowed"
+                disabled
+              >
+                Assigned
+              </button>
+            ) : (
+              <button
+                className="mt-3 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                onClick={() => handleAssignClick(request)}
+              >
+                Assign
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Assignment Form */}
+      {selectedRequest && formData && (
+        <form onSubmit={handleSubmit} className="mt-6 p-4 border rounded bg-gray-100 shadow-md">
+          <h3 className="text-lg font-bold mb-4">
+            Assign License for {selectedRequest.softwareName}
+          </h3>
+
+          <div className="mb-3">
+            <label className="block font-medium">Department ID:</label>
             <input
-              type="number"
-              id="licenseInventoryId"
+              type="text"
+              value={formData.departmentId}
+              readOnly
+              className="w-full border px-2 py-1 rounded bg-gray-200"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="block font-medium">License Inventory:</label>
+            <select
               name="licenseInventoryId"
               value={formData.licenseInventoryId}
               onChange={handleInputChange}
               required
-              className="w-full border border-gray-300 rounded px-2 py-1"
-            />
+              className="w-full border px-2 py-1 rounded"
+            >
+              <option value={0}>-- Select Inventory --</option>
+              {inventories
+                .filter((inv) => inv.softwareName === selectedRequest.softwareName)
+                .map((inv) => (
+                  <option key={inv.id} value={inv.id}>
+                    ID: {inv.id} | Available: {inv.availableQuantity}
+                  </option>
+                ))}
+            </select>
           </div>
-          <div>
-            <label htmlFor="assignedToUserId" className="block font-medium">Assigned To User ID</label>
+
+          <div className="mb-3">
+            <label className="block font-medium">Assigned Quantity:</label>
             <input
               type="number"
-              id="assignedToUserId"
-              name="assignedToUserId"
-              value={formData.assignedToUserId}
-              onChange={handleInputChange}
-              required
-              className="w-full border border-gray-300 rounded px-2 py-1"
-            />
-          </div>
-          <div>
-            <label htmlFor="assignedByUserId" className="block font-medium">Assigned By User ID</label>
-            <input
-              type="number"
-              id="assignedByUserId"
-              name="assignedByUserId"
-              value={formData.assignedByUserId}
-              onChange={handleInputChange}
-              required
-              className="w-full border border-gray-300 rounded px-2 py-1"
-            />
-          </div>
-          <div>
-            <label htmlFor="assignedQuantity" className="block font-medium">Assigned Quantity</label>
-            <input
-              type="number"
-              id="assignedQuantity"
               name="assignedQuantity"
               value={formData.assignedQuantity}
-              onChange={handleInputChange}
               min={1}
+              onChange={handleInputChange}
               required
-              className="w-full border border-gray-300 rounded px-2 py-1"
+              className="w-full border px-2 py-1 rounded"
             />
           </div>
-          <div>
-            <label htmlFor="expiresAt" className="block font-medium">Expires At</label>
+
+          <div className="mb-3">
+            <label className="block font-medium">Expiry Date:</label>
             <input
               type="date"
-              id="expiresAt"
               name="expiresAt"
               value={formData.expiresAt}
               onChange={handleInputChange}
               required
-              className="w-full border border-gray-300 rounded px-2 py-1"
+              className="w-full border px-2 py-1 rounded"
             />
           </div>
-          <div className="flex space-x-4">
-            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Submit</button>
-            <button type="button" onClick={handleCancel} className="bg-gray-300 px-4 py-2 rounded">Cancel</button>
+
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            >
+              {submitting ? 'Assigning...' : 'Assign License'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRequest(null);
+                setFormData(null);
+              }}
+              className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+            >
+              Cancel
+            </button>
           </div>
         </form>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">License Management</h1>
-      {requests.length === 0 ? (
-        <p>No license requests found.</p>
-      ) : (
-        <table className="min-w-full border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-4 py-2">ID</th>
-              <th className="border border-gray-300 px-4 py-2">Software Name</th>
-              <th className="border border-gray-300 px-4 py-2">Requested Quantity</th>
-              <th className="border border-gray-300 px-4 py-2">Status</th>
-              <th className="border border-gray-300 px-4 py-2">Assign</th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map(request => (
-              <tr key={request.id} className="text-center">
-                <td className="border border-gray-300 px-4 py-2">{request.id}</td>
-                <td className="border border-gray-300 px-4 py-2">{request.softwareName}</td>
-                <td className="border border-gray-300 px-4 py-2">{request.requestedQuantity}</td>
-                <td className="border border-gray-300 px-4 py-2">{request.status}</td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {request.status === 'PENDING' ? (
-                    <button
-                      onClick={() => openAssignForm(request)}
-                      className="bg-green-600 text-white px-3 py-1 rounded"
-                    >
-                      Assign
-                    </button>
-                  ) : (
-                    'Assigned'
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       )}
     </div>
   );

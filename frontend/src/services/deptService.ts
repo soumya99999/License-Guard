@@ -25,3 +25,12 @@ export const fetchAllLicenseRequests = async () => {
   }
 };
 
+export const getDepartmentById = async (id: number) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/departments/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching department with ID ${id}:`, error);
+    throw error;
+  }
+};

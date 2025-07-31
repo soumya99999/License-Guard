@@ -37,3 +37,4 @@ export const getAllLicenses = async () => {
         throw error;
     }
 }
+

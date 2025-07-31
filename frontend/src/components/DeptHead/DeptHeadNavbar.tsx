@@ -1,7 +1,6 @@
 // src/components/DeptHead/DeptHeadNavbar.tsx
 import DeptName from "./DeptName";
 import RequestLicense from "./RequestLicense";
-import UserJoinReqDropdown from "./UserJoinReqDropdown";
 import ToggleTheme from "./ToggleTheme";
 
 interface Props {
@@ -14,7 +13,6 @@ const DeptHeadNavbar = ({ toggleForm }: Props) => {
       <DeptName />
       <div className="flex items-center space-x-4 relative">
         <RequestLicense onClick={toggleForm} />
-        <UserJoinReqDropdown />
         <ToggleTheme />
       </div>
     </nav>
