@@ -1,16 +1,19 @@
 import axios from 'axios';
-import type { LicenseReport } from '../types/reportTypes';
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
-// Get all license reports (for Admin)
-export const getAllReports = async (): Promise<LicenseReport[]> => {
-  const response = await axios.get(`${API_BASE_URL}/reports/licenses/download`);
+// Download overall report directly as file
+export const downloadOverallReport = async (): Promise<Blob> => {
+  const response = await axios.get(`${API_BASE_URL}/reports/licenses/download`, {
+    responseType: 'blob', // ⬅️ this is key
+  });
   return response.data;
 };
 
-// Get license reports by department (for Dept Head)
-export const getReportsByDepartment = async (deptId: number): Promise<LicenseReport[]> => {
-  const response = await axios.get(`${API_BASE_URL}/reports/licenses/downloadByDepartment/${deptId}`);
+// Download report for a specific department as file
+export const downloadReportByDepartment = async (deptId: number): Promise<Blob> => {
+  const response = await axios.get(`${API_BASE_URL}/reports/licenses/downloadByDepartment/${deptId}`, {
+    responseType: 'blob',
+  });
   return response.data;
 };
