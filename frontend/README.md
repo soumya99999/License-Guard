@@ -1,69 +1,46 @@
-# React + TypeScript + Vite
+# 🎨 License Inventory Frontend – LicenseGuard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📘 Overview
 
-Currently, two official plugins are available:
+This is the **frontend interface** for the **License Inventory Management** module of the LicenseGuard system. It provides an intuitive UI for creating, viewing, and managing software license records tied to departmental procurement data. The frontend interacts with REST APIs exposed by the backend service to perform CRUD operations on license data.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🚀 Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- ✅ Create new software license entries using a form UI
+- 📋 View all licenses in a paginated and sortable table
+- 🔍 Filter licenses by:
+  - Department ID
+  - Procurement Record ID
+- 📅 View purchase and expiry details
+- 🔄 Real-time data sync via REST APIs
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+## 🛠️ Tech Stack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+| Layer           | Technology         |
+|----------------|--------------------|
+| Framework       | React.js / Next.js *(based on your stack)* |
+| HTTP Client     | Axios / Fetch API  |
+| Styling         | Tailwind CSS / Bootstrap / Material UI |
+| Routing         | React Router (if used) |
+| State Management| React Hooks / Redux Toolkit (optional) |
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🌐 API Integration
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+The frontend connects to the backend through these endpoints:
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| `POST` | `/api/licenses` | Submit new license data |
+| `GET`  | `/api/licenses` | Fetch all license records |
+| `GET`  | `/api/licenses/{id}` | Get license by ID |
+| `GET`  | `/api/licenses/department/{deptId}` | Get by department |
+| `GET`  | `/api/licenses/procurement/{procId}` | Get by procurement |
+
+---
+

@@ -50,7 +50,7 @@ const LicenseAssignment: React.FC = () => {
     setFormData({
       id: 0,
       licenseInventoryId: selectedInventoryId,
-      departmentId: request.departmentId,
+      departmentId: request.departmentId, // used in backend but hidden in UI
       assignedQuantity: request.requestedQuantity,
       expiresAt: '',
       softwareName: request.softwareName,
@@ -140,16 +140,6 @@ const LicenseAssignment: React.FC = () => {
           <h3 className="text-lg font-bold mb-4">
             Assign License for {selectedRequest.softwareName}
           </h3>
-
-          <div className="mb-3">
-            <label className="block font-medium">Department ID:</label>
-            <input
-              type="text"
-              value={formData.departmentId}
-              readOnly
-              className="w-full border px-2 py-1 rounded bg-gray-200"
-            />
-          </div>
 
           <div className="mb-3">
             <label className="block font-medium">License Inventory:</label>
